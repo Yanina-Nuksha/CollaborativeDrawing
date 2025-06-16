@@ -1,0 +1,135 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход и регистрация</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="..\css\styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <style>
+        body {
+            background: url('../resources/images/background.jpg') no-repeat center;
+            background-size: cover;
+        }
+
+        .auth-card {
+            background: rgba(255, 255, 255, 0.7);
+            padding: 30px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border-radius: 0;
+            margin: auto;
+            margin-top: 30%;
+        }
+
+        .form-link {
+            color: mediumslateblue;
+            text-decoration: none;
+        }
+
+            .form-link:hover {
+                color: aquamarine;
+            }
+    </style>
+</head>
+<body class="page-auth">
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-5">
+                <div class="auth-card">
+
+                    <div id="loginForm">
+                        <h1>Вход</h1>
+                        <div class="mb-3 input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input type="text" id="loginUsername" class="form-control" placeholder="Имя пользователя">
+                        </div>
+                        <div class="mb-3 input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" id="loginPassword" class="form-control" placeholder="Пароль">
+                            <span class="input-group-text" onclick="togglePasswordVisibility('loginPassword', this)">
+                                <i class="bi bi-eye-slash" id="loginPasswordEye"></i>
+                            </span>
+                        </div>
+                        <button class="btn-custom w-100" onclick="login()">Войти</button>
+                        <p class="text-center mt-3">Нет аккаунта? <a href="#" class="form-link" onclick="toggleForms()">Зарегистрироваться</a></p>
+                    </div>
+
+                    <div id="registerForm" style="display: none;">
+                        <h1>Регистрация</h1>
+                        <div class="mb-3 input-group">
+                            <span class="input-group-text"><i class="bi bi-person-plus"></i></span>
+                            <input type="text" id="registerUsername" class="form-control" placeholder="Имя пользователя">
+                        </div>
+                        <div class="mb-3 input-group">
+                            <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                            <input type="password" id="registerPassword" class="form-control" placeholder="Пароль" oninput="checkPasswordStrength(this.value)">
+                            <span class="input-group-text" onclick="togglePasswordVisibility('registerPassword', this)">
+                                <i class="bi bi-eye-slash" id="registerPasswordEye"></i>
+                            </span>
+                        </div>
+                        <div id="passwordStrength" class="form-text mt-1"></div>
+                        <button class="btn-custom w-100" onclick="register()">Зарегистрироваться</button>
+                        <p class="text-center mt-3">Уже есть аккаунт? <a href="#" class="form-link" onclick="toggleForms()">Войти</a></p>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/auth.js"></script>
+    <script>
+        function togglePasswordVisibility(inputId, eyeIconSpan) {
+            const input = document.getElementById(inputId);
+            const icon = eyeIconSpan.querySelector("i");
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            const strengthText = document.getElementById("passwordStrength");
+            password = password.trim();
+
+            let score = 0;
+
+            if (password.length >= 8) score++;
+            if (/[A-Za-zА-Яа-яЁё]/.test(password)) score++;
+            if (/\d/.test(password)) score++;
+            if (/[^A-Za-zА-Яа-яЁё0-9]/.test(password)) score++;
+
+            if (password.length === 0) {
+                strengthText.textContent = "";
+                return;
+            }
+
+            if (score <= 1) {
+                strengthText.textContent = "Слабый пароль";
+                strengthText.style.color = "red";
+            } else if (score === 2 || score === 3) {
+                strengthText.textContent = "Средний пароль";
+                strengthText.style.color = "orange";
+            } else {
+                strengthText.textContent = "Надёжный пароль";
+                strengthText.style.color = "green";
+            }
+        }
+    </script>
+</body>
+</html>
+
+

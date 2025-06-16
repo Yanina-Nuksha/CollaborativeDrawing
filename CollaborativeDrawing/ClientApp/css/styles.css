@@ -1,0 +1,90 @@
+﻿@font-face {
+    font-family: 'Aintbaroquenfw';
+    src: url('../resources/fonts/aavantenrbook.ttf');
+}
+
+@font-face {
+    font-family: 'Mrsonion_monsters';
+    src: url('../resources/fonts/mrsonion_monsters.ttf');
+}
+
+@font-face {
+    font-family: 'Berton';
+    src: url('../resources/fonts/berton-roman.ttf');
+}
+
+body {
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: 'Aintbaroquenfw';
+}
+
+.navbar {
+    background-color: mediumslateblue;
+    padding: 15px;
+}
+
+.navbar-brand {
+    color: white;
+    font-size: 1.8em;
+    font-weight: bold;
+}
+
+.navbar-nav .nav-link {
+    color: white;
+    font-size: 1.2em;
+    margin-right: 15px;
+}
+
+    .navbar-nav .nav-link:hover {
+        color: aquamarine;
+        cursor: pointer;
+    }
+
+.btn-custom {
+    font-size: 1.2em;
+    padding: 12px 25px;
+    background-color: mediumslateblue;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+    margin: 10px 0;
+    border: none;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+    .btn-custom:hover {
+        background-color: aquamarine;
+    }
+
+.session-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: left;
+    width: 100%;
+    margin-bottom: 15px;
+    transition: transform 0.3s ease-in-out;
+}
+
+    .session-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .session-card h3 {
+        font-family: 'Berton';
+    }
+
+h1, h3 {
+    color: mediumslateblue;
+    font-size: 2.2em;
+    margin-bottom: 20px;
+    font-family: 'Mrsonion_monsters';
+}

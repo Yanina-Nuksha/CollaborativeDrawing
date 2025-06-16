@@ -1,0 +1,862 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Холст</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="..\css\styles.css" rel="stylesheet">
+    <script src="https://unpkg.com/konva@9/konva.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Montserrat&family=Lobster&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: url('../resources/images/background_3.jpg') no-repeat center;
+            background-size: cover;
+        }
+
+        #exit-button {
+            background: red;
+            color: white;
+            padding: 1.2vh;
+            border: none;
+            cursor: pointer;
+            opacity: 0.7;
+            font-family: 'Aintbaroquenfw';
+        }
+
+        #colorPicker {
+            cursor: pointer;
+            width: 12vh;
+            height: 7vh;
+        }
+
+        #toolbar {
+            background-color: #5D6069;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2vh;
+            color: white;
+            flex-wrap: wrap;
+            width: 100%;
+        }
+
+        .toolbar-group {
+            margin-left: 1.4vh;
+            display: flex;
+            align-items: center;
+            gap: 1.4vh;
+        }
+
+        #toolbar button, select {
+            background-color: mediumslateblue;
+            color: #fff;
+            border: none;
+            padding: 1.1vh 1.7vh;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            #toolbar button:hover {
+                background-color: aquamarine;
+            }
+
+        #toolbar input[type="range"] {
+            accent-color: mediumslateblue;
+        }
+
+        #main-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            height: 100vh;
+            transform-origin: 0 0;
+            will-change: transform;
+        }
+
+
+        #user-list-container {
+            width: 250px;
+            padding: 1.4vh;
+            background: rgba(255, 255, 255, 0.4);
+            font-family: 'Berton';
+            transition: transform 0.3s ease-in-out;
+        }
+
+
+        #chat-container {
+            width: 250px;
+            padding: 1.4vh;
+            background: rgba(255, 255, 255, 0.4);
+            display: flex;
+            flex-direction: column;
+        }
+
+        #user-list-container h3 {
+            text-align: center;
+            color: black;
+            font-family: 'Aintbaroquenfw';
+        }
+
+        #user-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .user-item {
+            background: rgba(255, 255, 255, 0.5);
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+            .user-item:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+        .username {
+            font-weight: bold;
+        }
+
+        .remove-user {
+            background: transparent;
+            border: none;
+            color: red;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .guest {
+            color: #ff6b6b;
+            font-size: 0.9em;
+        }
+
+        .remove-user:hover {
+            color: darkred;
+        }
+
+        #drawingCanvas {
+            flex-grow: 1;
+            background: #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            touch-action: none;
+
+        }
+
+        #chat-messages {
+            flex-grow: 1;
+            padding: 10px;
+            overflow-y: auto;
+            max-height: 500px;
+            background: rgba(255, 255, 255, 0.2);
+            font-family: 'Berton';
+        }
+
+        .chat-message {
+            max-width: 95%;
+            margin: 10px auto;
+            padding: 10px 15px;
+            border-radius: 16px;
+            background-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            font-size: 16px;
+            line-height: 1.4;
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        #chat-input {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+
+        #send-message {
+            background: #20c997;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        #send-message {
+            background: mediumslateblue;
+            color: white;
+            border: none;
+            border-radius: 0;
+            transition: 0.3s;
+            margin-top: 5px;
+        }
+
+            #send-message:hover {
+                background-color: aquamarine;
+            }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            opacity: 1;
+            transition: opacity 0.5s ease-in-out;
+        }
+
+        .menu {
+            display: none;
+            position: absolute;
+            background: white;
+            border: 1px solid black;
+            padding: 10px;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 10;
+            width: 250px;
+        }
+
+            .menu input, .menu select {
+                width: 100%;
+                margin-bottom: 5px;
+            }
+
+        #deleteImageButton, #bringForwardButton, #sendBackwardButton {
+            z-index: 1000;
+        }
+
+        select {
+            appearance: none;
+            background-color: #6a5acd;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+            position: relative;
+        }
+
+            select::after {
+                content: "▼";
+                font-size: 12px;
+                position: absolute;
+                right: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+            }
+
+            select:hover {
+                background-color: #20c997;
+            }
+
+        .range-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            font-size: 14px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        select#brushSelector,
+        select#shapeSelector {
+            appearance: none;
+            background-color: mediumslateblue;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+            border-radius: 0;
+        }
+
+            select#brushSelector:hover,
+            select#shapeSelector:hover {
+                background-color: #20c997;
+            }
+
+            select#brushSelector:focus,
+            select#shapeSelector:focus {
+                outline: 2px solid #20c997;
+            }
+
+            select#brushSelector option,
+            select#shapeSelector option {
+                background: white;
+                color: black;
+                padding: 10px;
+                font-size: 14px;
+            }
+
+        body {
+            cursor: default;
+        }
+
+        #eraser.active {
+            background-color: #f54d4d;
+        }
+
+        #addText.active {
+            background-color: #ffffff;
+        }
+
+        #drawingCanvas.eraser-active {
+            cursor: url(../resources/images/eraser.png), auto;
+        }
+
+        #drawingCanvas.text-active {
+            cursor: url(../resources/images/text.png), auto;
+        }
+
+        #toggle-users-btn,
+        #toggle-chat-btn {
+            display: none;
+            background-color: mediumslateblue;
+            color: white;
+            border: none;
+            border-radius: 0;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #closeEditButton, #closeImageEditButton {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            color: black;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            z-index: 2000;
+        }
+
+        #textMenu {
+            z-index: 1000;
+            cursor: move;
+            user-select: none;
+        }
+
+            #textMenu button {
+                padding: 5px 10px;
+                border: none;
+                background: #f0f0f0;
+                cursor: pointer;
+                border-radius: 4px;
+            }
+
+        #imageMenu.menu {
+            position: absolute;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            cursor: move;
+        }
+
+        #imageMenu button {
+            padding: 5px 10px;
+            border: none;
+            background: #f0f0f0;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+            #imageMenu button:hover {
+                background: #e0e0e0;
+            }
+
+
+        @media (max-width: 1024px) {
+            .menu {
+                width: 200px;
+            }
+
+            #user-list-container,
+            #chat-container {
+                flex-grow: 1;
+                display: none;
+                width: 100%;
+                height: calc(100vh - 120px);
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 999;
+                background: #ffffff;
+                overflow-y: auto;
+            }
+
+                #user-list-container.show,
+                #chat-container.show {
+                    display: block;
+                }
+
+            #main-container {
+                flex-direction: column;
+            }
+
+            #toolbar {
+                position: fixed;
+                bottom: 0;
+                flex-wrap: wrap;
+                overflow-x: auto;
+                justify-content: center;
+                align-items: center;
+                padding: 5px;
+                z-index: 1000;
+            }
+
+                #toolbar .toolbar-group {
+                    flex-direction: row;
+                    flex-wrap: wrap;
+                }
+
+                #toolbar button, #toolbar select, #toolbar input[type="range"] {
+                    font-size: 0;
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+
+                    #toolbar button::before,
+                    #toolbar select::before {
+                        font-size: 18px;
+                    }
+
+            #undo::before {
+                content: "\f0e2";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #redo::before {
+                content: "\f01e";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #eraser::before {
+                content: "\f12d";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #addText::before {
+                content: "\f031";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #insertImage::before {
+                content: "\f03e";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #endSessionButton::before {
+                content: "\f011";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #exportImageButton::before {
+                content: "\f56d";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #toggle-users-btn::before {
+                content: "\f0c0";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            #toggle-chat-btn::before {
+                content: "\f075";
+                font-family: "Font Awesome 6 Free";
+                font-weight: 900;
+            }
+
+            .select-wrapper {
+                position: relative;
+                width: 40px;
+                height: 40px;
+            }
+
+                .select-wrapper select {
+                    font-size: 0;
+                    background-color: mediumslateblue;
+                    border: none;
+                    width: 100%;
+                    height: 100%;
+                    padding: 0;
+                    border-radius: 0;
+                    color: transparent;
+                    cursor: pointer;
+                    background-repeat: no-repeat;
+                    background-position: center;
+                    background-size: 20px 20px;
+                }
+
+                    .select-wrapper select:focus {
+                        outline: 2px solid #20c997;
+                    }
+        }
+
+        @media (min-width: 769px) and (max-width: 1199px) {
+            #toolbar {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            #main-container {
+                flex-direction: row;
+                height: 100vh;
+                width: 100vw;
+                position: relative;
+            }
+            #user-list-container,
+            #chat-container {
+                flex-grow: 1;
+                display: none;
+                width: 100%;
+                height: calc(100vh - 22vh);
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 999;
+                background: #ffffff;
+                overflow-y: auto;
+            }
+
+                #user-list-container.show,
+                #chat-container.show {
+                    display: block;
+                }
+
+            #main-container {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 1199px) {
+            #toggle-users-btn,
+            #toggle-chat-btn {
+                display: flex;
+            }
+
+            body, html {
+                overflow: hidden;
+                touch-action: none;
+            }
+
+            #chat-container.show {
+                display: flex;
+            }
+
+            #toolbar {
+                height: 22vh;
+            }
+
+            #user-list-container,
+            #chat-container {
+                flex-grow: 1;
+                display: none;
+                width: 100%;
+                height: calc(100vh - 28vh);
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 999;
+                background: #ffffff;
+                overflow-y: auto;
+            }
+
+            #main-container {
+                height: calc(100vh - 22vh);
+                width: 100%;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            #drawingCanvas {
+                flex-grow: 1;
+                background: #ccc;
+                position: relative;
+                touch-action: none;
+            }
+
+
+        }
+    </style>
+</head>
+<body class="page-daraw">
+
+    <div id="toolbar">
+        <div class="toolbar-group">
+            <input type="color" id="colorPicker">
+        </div>
+
+        <div class="toolbar-group">
+            <div class="range-container">
+                <label for="thickness">Толщина</label>
+                <input type="range" id="thickness" min="1" max="10">
+            </div>
+
+            <div class="range-container">
+                <label for="opacity">Прозрачность</label>
+                <input type="range" id="opacity" min="0" max="1" step="0.05" value="1">
+            </div>
+        </div>
+
+        <div class="toolbar-group">
+            <button id="undo">⟲</button>
+            <button id="redo">⟳</button>
+            <button id="eraser">Стёрка</button>
+        </div>
+
+        <div class="toolbar-group">
+            <div class="select-wrapper">
+                <select id="brushSelector">
+                    <option value="pencil"> Карандаш</option>
+                    <option value="pen"> Перо</option>
+                    <option value="airbrush"> Аэрограф</option>
+                </select>
+            </div>
+
+            <div class="select-wrapper">
+                <select id="shapeSelector">
+                    <option value=""> Выбрать форму</option>
+                    <option value="straightline"> Линия</option>
+                    <option value="rectangle"> Прямоугольник</option>
+                    <option value="square"> Квадрат</option>
+                    <option value="ellipse"> Эллипс</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="toolbar-group">
+            <button id="addText">Текст</button>
+            <button id="insertImage">Вставить изображение</button>
+            <input type="file" id="imageLoader" accept="image/*" style="display: none;">
+            <button id="exportImageButton" onclick="exportImage()">Сохранить</button>
+            <button id="endSessionButton" style="display: none;" onclick="endSession()">Остановить и сохранить</button>
+        </div>
+
+        <div class="toolbar-group">
+            <button id="toggle-users-btn" class="toolbar-toggle"><i class="fas fa-users"></i></button>
+            <button id="toggle-chat-btn" class="toolbar-toggle"><i class="fas fa-comments"></i></button>
+        </div>
+
+    </div>
+
+    <div id="main-container">
+        <div id="user-list-container">
+            <h3>Участники</h3>
+            <ul id="user-list"></ul>
+            <button id="exit-button" onclick="leaveSession()">Выйти</button>
+        </div>
+
+        <div id="drawingCanvas"></div>
+
+        <div id="chat-container">
+            <div id="chat-messages"></div>
+            <input type="text" id="chat-input" placeholder="Введите сообщение...">
+            <button id="send-message">Отправить</button>
+        </div>
+    </div>
+
+    <div id="imageMenu" class="menu" style="display: none;">
+        <button id="bringToFrontButton">На передний план</button>
+        <button id="bringForwardButton">Вперёд</button>
+        <button id="sendBackwardButton">Назад</button>
+        <button id="sendToBackButton">На задний план</button>
+        <button id="deleteImageButton">Удалить</button>
+        <button id="closeImageEditButton">✖</button>
+    </div>
+
+    <div id="textMenu" class="menu">
+        <label> Текст:</label>
+        <input type="text" id="textValue">
+
+        <label> Размер:</label>
+        <input type="number" id="textSize" min="10" max="100" value="20">
+
+        <label> Шрифт:</label>
+        <select id="textFont">
+            <option value="Arial" style="font-family: Arial;">Arial</option>
+            <option value="Courier New" style="font-family: 'Courier New';">Courier New</option>
+            <option value="Georgia" style="font-family: Georgia;">Georgia</option>
+            <option value="Times New Roman" style="font-family: 'Times New Roman';">Times New Roman</option>
+            <option value="Verdana" style="font-family: Verdana;">Verdana</option>
+            <option value="Roboto" style="font-family: 'Roboto', sans-serif;">Roboto</option>
+            <option value="Montserrat" style="font-family: 'Montserrat', sans-serif;">Montserrat</option>
+            <option value="Lobster" style="font-family: 'Lobster', cursive;">Lobster</option>
+        </select>
+
+
+        <label> Цвет:</label>
+        <input type="color" id="textColor">
+
+        <button id="updateText"> Применить</button>
+        <button id="deleteText"> Удалить</button>
+        <button id="closeEditButton" onclick="closeEditMenu()">✖</button>
+    </div>
+
+    <script src="../js/signalr.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/session.js"></script>
+    <script src="../js/chat.js"></script>
+    <script>
+        fetchSessionUsers();
+        checkIfHost(sessionId);
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const chatContainer = document.getElementById("chat-container");
+            const userListContainer = document.getElementById("user-list-container");
+
+            document.getElementById("toggle-chat-btn").addEventListener("click", () => {
+                chatContainer.classList.toggle("show");
+                userListContainer.classList.remove("show");
+            });
+
+            document.getElementById("toggle-users-btn").addEventListener("click", () => {
+                userListContainer.classList.toggle("show");
+                chatContainer.classList.remove("show");
+            });
+        });
+        document.body.style.overflow = "hidden";
+
+        const toolIcons = {
+            pencil: '✏️',
+            pen: '🖊️',
+            airbrush: '💨',
+        };
+        const shapeIcons = {
+            "": "➕",
+            straightline: "📏",
+            rectangle: "▭",
+            square: "⬛",
+            ellipse: "◯",
+        };
+        function setSelectIcon(selectId, iconMap) {
+            const select = document.getElementById(selectId);
+
+            function updateIcon() {
+                const value = select.value;
+                const icon = iconMap[value];
+
+                if (!icon) {
+                    resetSelectStyle(selectId);
+                    return;
+                }
+
+                const svgIcon = `<svg xmlns="http://www.w3.org/2000/svg" height="24" width="24">
+                    <text x="0" y="20" font-size="20">${icon}</text></svg>`;
+
+                const encoded = encodeURIComponent(svgIcon.trim());
+                const dataUrl = `url("data:image/svg+xml,${encoded}")`;
+                const isMobile = window.innerWidth <= 768;
+                select.style.backgroundImage = dataUrl;
+                select.style.backgroundRepeat = "no-repeat";
+                select.style.backgroundPosition = "left 5px center";
+                select.style.backgroundSize = "24px 24px";
+                select.style.paddingLeft = isMobile ? "5px" : "30px";            }
+
+            select.addEventListener("change", updateIcon);
+            updateIcon();
+        }
+        function resetSelectStyle(selectId) {
+            const select = document.getElementById(selectId);
+            select.style.removeProperty("background-image");
+            select.style.removeProperty("background-repeat");
+            select.style.removeProperty("background-position");
+            select.style.removeProperty("background-size");
+            select.style.removeProperty("padding-left");
+        }
+        setSelectIcon("brushSelector", toolIcons);
+        setSelectIcon("shapeSelector", shapeIcons);
+
+        makeDraggable(document.getElementById("textMenu"));
+        makeDraggable(document.getElementById("imageMenu"));
+
+        function makeDraggable(el) {
+            let isDragging = false;
+            let offset = { x: 0, y: 0 };
+
+            function onMouseDown(e) {
+                if (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "BUTTON") return;
+
+                isDragging = true;
+                const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+                const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+
+                offset.x = clientX - el.offsetLeft;
+                offset.y = clientY - el.offsetTop;
+                document.body.style.userSelect = 'none';
+            }
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                const clientX = e.clientX ?? e.touches?.[0]?.clientX;
+                const clientY = e.clientY ?? e.touches?.[0]?.clientY;
+
+                el.style.left = `${clientX - offset.x}px`;
+                el.style.top = `${clientY - offset.y}px`;
+            }
+
+            function onMouseUp() {
+                isDragging = false;
+                document.body.style.userSelect = '';
+            }
+
+            el.addEventListener("mousedown", onMouseDown);
+            el.addEventListener("touchstart", onMouseDown, { passive: false });
+
+            document.addEventListener("mousemove", onMouseMove);
+            document.addEventListener("touchmove", onMouseMove, { passive: false });
+
+            document.addEventListener("mouseup", onMouseUp);
+            document.addEventListener("touchend", onMouseUp);
+        }
+
+    </script>
+
+</body>
+</html>
